@@ -7,5 +7,6 @@ Bullet Points para o projeto:
     - as fases 5 fases não precisam ser em seguida;
     - em cada fase deve ter um personagem novo;
       
-*criar a classe 'fase' composta pelo conjunto de personagens que pertencem a fase, só passa a lista desses personagens e o mapa desenhado;
+* Criar a classe 'fase' composta pelo conjunto de personagens que pertencem a fase, só passa a lista desses personagens e o mapa desenhado;
+    - trocar de fase significa apenas substituir o objeto fase atual;
 
