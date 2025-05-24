@@ -25,7 +25,7 @@ public class Caveira extends Estatico {
             this.iContaIntervalos = 0;
             Fogo f = new Fogo("fire.png");
             f.setPosicao(pPosicao.getLinha(),pPosicao.getColuna()+1);
-            Desenho.acessoATelaDoJogo().addPersonagem(f);
+            Desenho.getTelaJogo().adicionarPersonagem(f);
         }
     }    
 }

@@ -21,7 +21,8 @@ public class Hero extends Animado {
     
     public boolean setPosicao(int linha, int coluna){
         if(this.pPosicao.setPosicao(linha, coluna)){
-            if (!Desenho.acessoATelaDoJogo().ehPosicaoValida(this.getPosicao())) {
+            if (!Desenho.getTelaJogo().getControleDeJogo().ehPosicaoValida(
+                    Desenho.getTelaJogo().getFaseAtual(), this.getPosicao())) {
                 this.voltaAUltimaPosicao();
             }
             return true;

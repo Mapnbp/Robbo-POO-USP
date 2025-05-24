@@ -17,7 +17,7 @@ public class Fogo extends Animado{
     public void autoDesenho() {
         super.autoDesenho();
         if(!this.moveRight())
-            Desenho.acessoATelaDoJogo().removePersonagem(this);
+            Desenho.getTelaJogo().removerPersonagem(this);
     }
     
 }

@@ -9,7 +9,7 @@ public class Main {
                 Tela tTela = new Tela();
                 tTela.setVisible(true);
                 tTela.createBufferStrategy(2);
-                tTela.go();
+                tTela.iniciarJogo();
             }
         });
     }

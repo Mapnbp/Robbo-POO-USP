@@ -57,7 +57,7 @@ public abstract class Personagem implements Serializable {
     }
 
     public void autoDesenho(){
-        Desenho.desenhar(this.iImage, this.pPosicao.getColuna(), this.pPosicao.getLinha());        
+        Desenho.desenharImagem(this.iImage, this.pPosicao.getColuna(), this.pPosicao.getLinha());
     }
 
     public boolean setPosicao(int linha, int coluna) {

@@ -14,12 +14,13 @@ public class Animado extends Personagem{
     }
     
     /*TO-DO: este metodo pode ser interessante a todos os personagens que se movem*/
-    private boolean validaPosicao(){
-        if (!Desenho.acessoATelaDoJogo().ehPosicaoValida(this.getPosicao())) {
+    private boolean validaPosicao() {
+        if (!Desenho.getTelaJogo().getControleDeJogo().ehPosicaoValida(
+                Desenho.getTelaJogo().getFaseAtual(), this.getPosicao())) {
             this.voltaAUltimaPosicao();
             return false;
         }
-        return true;       
+        return true;
     }
     
     public boolean moveUp() {
