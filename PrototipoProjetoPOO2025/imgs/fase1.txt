@@ -1,0 +1,7 @@
+Hero;Robbo.png;0;7
+ZigueZague;robo.png;5;5
+BichinhoVaiVemHorizontal;roboPink.png;3;3
+BichinhoVaiVemHorizontal;roboPink.png;6;6
+BichinhoVaiVemVertical;Caveira.png;10;10
+Caveira;caveira.png;9;1
+Chaser;chaser.png;12;12

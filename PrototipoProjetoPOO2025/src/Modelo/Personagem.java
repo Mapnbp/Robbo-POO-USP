@@ -44,7 +44,7 @@ public abstract class Personagem implements Serializable {
 
     public Posicao getPosicao() {
         /*TODO: Retirar este método para que objetos externos nao possam operar
-         diretamente sobre a posição do Personagem*/
+         diretamente sobre a posição do Personagem */
         return pPosicao;
     }
 

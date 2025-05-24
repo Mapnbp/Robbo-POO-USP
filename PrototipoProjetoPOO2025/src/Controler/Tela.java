@@ -2,19 +2,10 @@ package Controler;
 
 // Bibliotecas importadas:
 // - Auxiliar.*: Classes auxiliares como constantes, desenho e posicoes no jogo.
-import Auxiliar.Consts;
-import Auxiliar.Desenho;
-import Auxiliar.Posicao;
+import Auxiliar.*;
 
 // - Modelo.*: Classes dos personagens e da fase do jogo.
-import Modelo.BichinhoVaiVemHorizontal;
-import Modelo.BichinhoVaiVemVertical;
-import Modelo.Caveira;
-import Modelo.Chaser;
-import Modelo.Fase;
-import Modelo.Hero;
-import Modelo.Personagem;
-import Modelo.ZigueZague;
+import Modelo.*;
 
 // - java.awt.*: Para manipulacao grafica (Graphics, Image, Toolkit).
 import java.awt.Graphics;
@@ -44,6 +35,11 @@ import javax.swing.GroupLayout;
 import javax.swing.JFrame;
 import javax.swing.GroupLayout.Alignment;
 
+// Para ler as fases
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 // Classe principal da janela do jogo que representa a tela de exibicao e controle do jogo.
 // Implementa KeyListener para capturar os eventos de teclado.
 public class Tela extends JFrame implements KeyListener {
@@ -52,6 +48,7 @@ public class Tela extends JFrame implements KeyListener {
     private Hero heroi;
 
     // Fase atual do jogo, que contem todos os personagens e elementos
+    private Fase fases[] = new Fase[5];
     private Fase faseAtual;
 
     // ControleDeJogo centraliza regras e processamento da fase
@@ -63,6 +60,54 @@ public class Tela extends JFrame implements KeyListener {
     // Coordenadas da "camera" que controla qual parte do mapa esta sendo exibida na tela
     private int cameraLinha = 0;
     private int cameraColuna = 0;
+    private int contadorDeFases = 1;
+
+    public void carregarFase(String caminhoArquivo) {
+        if (contadorDeFases < 6) {
+            try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo))) {
+                String linha;
+                while ((linha = br.readLine()) != null) {
+                    String[] partes = linha.split(";");
+                    String tipo = partes[0];
+                    String imagem = partes[1];
+                    int x = Integer.parseInt(partes[2]); // linha
+                    int y = Integer.parseInt(partes[3]); // coluna
+
+                    Personagem personagem = null;
+
+                    switch (tipo) {
+                        case "Hero":
+                            this.heroi = new Hero(imagem);
+                            this.heroi.setPosicao(x, y);
+                            this.faseAtual.add(this.heroi);
+                            break;
+                        case "ZigueZague":
+                            personagem = new ZigueZague(imagem);
+                            break;
+                        case "BichinhoVaiVemHorizontal":
+                            personagem = new BichinhoVaiVemHorizontal(imagem);
+                            break;
+                        case "BichinhoVaiVemVertical":
+                            personagem = new BichinhoVaiVemVertical(imagem);
+                            break;
+                        case "Caveira":
+                            personagem = new Caveira(imagem);
+                            break;
+                        case "Chaser":
+                            personagem = new Chaser(imagem);
+                            break;
+                    }
+
+                    if (personagem != null) {
+                        personagem.setPosicao(x, y);
+                        this.faseAtual.add(personagem);
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("erro");
+            }
+        }
+    }
 
     // Construtor
     public Tela() {
@@ -73,39 +118,8 @@ public class Tela extends JFrame implements KeyListener {
         // Define o tamanho da janela considerando as bordas e insets
         this.setSize(750 + this.getInsets().left + this.getInsets().right, 750 + this.getInsets().top + this.getInsets().bottom);
 
-        // Cria uma fase vazia
         this.faseAtual = new Fase(new ArrayList<>());
-
-        // Cria o heroi e posiciona no mapa
-        this.heroi = new Hero("Robbo.png");
-        this.heroi.setPosicao(0, 7);
-        this.faseAtual.add(this.heroi);
-        this.atualizaCamera();
-
-        // Cria outros personagens e os adiciona a fase
-        ZigueZague inimigoZigZag = new ZigueZague("robo.png");
-        inimigoZigZag.setPosicao(5, 5);
-        this.faseAtual.add(inimigoZigZag);
-
-        BichinhoVaiVemHorizontal bichinhoHorizontal1 = new BichinhoVaiVemHorizontal("roboPink.png");
-        bichinhoHorizontal1.setPosicao(3, 3);
-        this.faseAtual.add(bichinhoHorizontal1);
-
-        BichinhoVaiVemHorizontal bichinhoHorizontal2 = new BichinhoVaiVemHorizontal("roboPink.png");
-        bichinhoHorizontal2.setPosicao(6, 6);
-        this.faseAtual.add(bichinhoHorizontal2);
-
-        BichinhoVaiVemVertical bichinhoVertical = new BichinhoVaiVemVertical("Caveira.png");
-        bichinhoVertical.setPosicao(10, 10);
-        this.faseAtual.add(bichinhoVertical);
-
-        Caveira caveira = new Caveira("caveira.png");
-        caveira.setPosicao(9, 1);
-        this.faseAtual.add(caveira);
-
-        Chaser perseguidor = new Chaser("chaser.png");
-        perseguidor.setPosicao(12, 12);
-        this.faseAtual.add(perseguidor);
+        this.carregarFase("imgs/fase" + contadorDeFases + ".txt");
     }
 
     // Getters para a posicao atual da camera
@@ -160,13 +174,26 @@ public class Tela extends JFrame implements KeyListener {
                 int mapaColuna = this.cameraColuna + j;
 
                 // Verifica se a posição ta dentro dos limites do mapa
-                if (mapaLinha < 40 && mapaColuna < 15) {
+                if ((mapaLinha != 0 && mapaLinha < 39) && (mapaColuna !=0 && mapaColuna < 14)) {
                     try {
                         Toolkit toolkit = Toolkit.getDefaultToolkit();
                         String caminhoBase = (new File(".")).getCanonicalPath();
 
                         // Carrega a imagem do bloco (chao)
                         Image imagemBloco = toolkit.getImage(caminhoBase + Consts.PATH + "bricks.png");
+
+                        // Desenha a imagem do bloco na posicao correta
+                        this.graphicsBuffer.drawImage(imagemBloco, j * 50, i * 50, 50, 50, (ImageObserver)null);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    try {
+                        Toolkit toolkit = Toolkit.getDefaultToolkit();
+                        String caminhoBase = (new File(".")).getCanonicalPath();
+
+                        // Carrega a imagem do bloco (chao)
+                        Image imagemBloco = toolkit.getImage(caminhoBase + Consts.PATH + "queijo.png");
 
                         // Desenha a imagem do bloco na posicao correta
                         this.graphicsBuffer.drawImage(imagemBloco, j * 50, i * 50, 50, 50, (ImageObserver)null);
@@ -219,6 +246,8 @@ public class Tela extends JFrame implements KeyListener {
         // Codigo 67 = 'C' limpa a fase atual (remove todos personagens)
         if (e.getKeyCode() == 67) {
             this.faseAtual.clear();
+            contadorDeFases++;
+            this.carregarFase("imgs/fase" + contadorDeFases + ".txt");
 
             // Setas cima(38) ou W(87) movem o heroi para cima
         } else if (e.getKeyCode() == 38 || e.getKeyCode() == 87) {
