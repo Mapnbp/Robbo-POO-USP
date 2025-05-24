@@ -3,18 +3,19 @@ package Controler;
 import Modelo.Chaser;
 import Modelo.Personagem;
 import Modelo.Hero;
-import auxiliar.Posicao;
+import Modelo.Fase;
+import Auxiliar.Posicao;
 import java.util.ArrayList;
 
 public class ControleDeJogo {
     
-    public void desenhaTudo(ArrayList<Personagem> e) {
+    public void desenhaTudo(Fase e) {
         for (int i = 0; i < e.size(); i++) {
             e.get(i).autoDesenho();
         }
     }
     
-    public void processaTudo(ArrayList<Personagem> umaFase) {
+    public void processaTudo(Fase umaFase) {
         Hero hero = (Hero) umaFase.get(0);
         Personagem pIesimoPersonagem;
         for (int i = 1; i < umaFase.size(); i++) {
@@ -29,6 +30,7 @@ public class ControleDeJogo {
         }
         for (int i = 1; i < umaFase.size(); i++) {
             pIesimoPersonagem = umaFase.get(i);
+            // se for um Chaser procura nova posicao
             if (pIesimoPersonagem instanceof Chaser) {
                 ((Chaser) pIesimoPersonagem).computeDirection(hero.getPosicao());
             }
@@ -37,7 +39,7 @@ public class ControleDeJogo {
 
     /*Retorna true se a posicao p é válida para Hero 
     com relacao a todos os personagens no array*/
-    public boolean ehPosicaoValida(ArrayList<Personagem> umaFase, Posicao p) {
+    public boolean ehPosicaoValida(Fase umaFase, Posicao p) {
         Personagem pIesimoPersonagem;
         for (int i = 1; i < umaFase.size(); i++) {
             pIesimoPersonagem = umaFase.get(i);

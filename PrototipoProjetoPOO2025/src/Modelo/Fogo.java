@@ -1,11 +1,12 @@
 package Modelo;
 
 import Auxiliar.Desenho;
+import Auxiliar.Posicao;
 import Controler.Tela;
 import java.awt.Graphics;
 import java.io.Serializable;
 
-public class Fogo extends Personagem implements Serializable{
+public class Fogo extends Animado{
             
     public Fogo(String sNomeImagePNG) {
         super(sNomeImagePNG);

@@ -2,9 +2,10 @@
 package Modelo;
 
 import Auxiliar.Desenho;
+import Auxiliar.Posicao;
 import java.util.Random;
 
-public class BichinhoVaiVemVertical extends Personagem{
+public class BichinhoVaiVemVertical extends Animado {
     boolean bUp;
     public BichinhoVaiVemVertical(String sNomeImagePNG) {
         super(sNomeImagePNG);

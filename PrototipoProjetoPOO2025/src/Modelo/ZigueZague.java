@@ -1,9 +1,10 @@
 package Modelo;
 
 import Auxiliar.Desenho;
+import Auxiliar.Posicao;
 import java.util.Random;
 
-public class ZigueZague extends Personagem{
+public class ZigueZague extends Animado {
     
     public ZigueZague(String sNomeImagePNG) {
         super(sNomeImagePNG);

@@ -2,6 +2,7 @@ package Modelo;
 
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
+import Auxiliar.Posicao;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -11,7 +12,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class BichinhoVaiVemHorizontal extends Personagem implements Serializable {
+public class BichinhoVaiVemHorizontal extends Animado {
 
     private boolean bRight;
     int iContador;

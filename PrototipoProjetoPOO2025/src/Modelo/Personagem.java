@@ -3,7 +3,7 @@ package Modelo;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
 import Controler.Tela;
-import auxiliar.Posicao;
+import Auxiliar.Posicao;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -20,14 +20,14 @@ public abstract class Personagem implements Serializable {
     protected Posicao pPosicao;
     protected boolean bTransponivel; /*Pode passar por cima?*/
     protected boolean bMortal;       /*Se encostar, morre?*/
+    protected int vidas;
 
     public boolean isbMortal() {
         return bMortal;
     }
 
-
     protected Personagem(String sNomeImagePNG) {
-        this.pPosicao = new Posicao(1, 1);
+        this.pPosicao = new Posicao(1,1);
         this.bTransponivel = true;
         this.bMortal = false;
         try {
@@ -64,7 +64,20 @@ public abstract class Personagem implements Serializable {
         return pPosicao.setPosicao(linha, coluna);
     }
 
-    public boolean moveUp() {
+    public int getVidas() {
+        return vidas;
+    }
+    
+    protected boolean perdeVida(){
+        if (this.isbMortal()){
+            vidas -= vidas;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    /*public boolean moveUp() {
         return this.pPosicao.moveUp();
     }
 
@@ -79,4 +92,5 @@ public abstract class Personagem implements Serializable {
     public boolean moveLeft() {
         return this.pPosicao.moveLeft();
     }
+    */
 }
