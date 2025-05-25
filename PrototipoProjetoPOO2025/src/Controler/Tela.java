@@ -193,7 +193,7 @@ public class Tela extends JFrame implements KeyListener {
                         String caminhoBase = (new File(".")).getCanonicalPath();
 
                         // Carrega a imagem do bloco (chao)
-                        Image imagemBloco = toolkit.getImage(caminhoBase + Consts.PATH + "queijo.png");
+                        Image imagemBloco = toolkit.getImage(caminhoBase + Consts.PATH + "parede.png");
 
                         // Desenha a imagem do bloco na posicao correta
                         this.graphicsBuffer.drawImage(imagemBloco, j * 50, i * 50, 50, 50, (ImageObserver)null);
