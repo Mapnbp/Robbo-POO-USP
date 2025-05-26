@@ -66,48 +66,75 @@ public class Tela extends JFrame implements KeyListener {
         if (contadorDeFases < 6) {
             try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo))) {
                 String linha;
+                int linhaMatriz = 0;
+
+                // 1. Processar a matriz das paredes
                 while ((linha = br.readLine()) != null) {
+                    if (linha.equalsIgnoreCase("Fim;")) break;
+
                     String[] partes = linha.split(";");
-                    String tipo = partes[0];
-                    String imagem = partes[1];
-                    int x = Integer.parseInt(partes[2]); // linha
-                    int y = Integer.parseInt(partes[3]); // coluna
-
-                    Personagem personagem = null;
-
-                    switch (tipo) {
-                        case "Hero":
-                            this.heroi = new Hero(imagem);
-                            this.heroi.setPosicao(x, y);
-                            this.faseAtual.add(this.heroi);
-                            break;
-                        case "ZigueZague":
-                            personagem = new ZigueZague(imagem);
-                            break;
-                        case "BichinhoVaiVemHorizontal":
-                            personagem = new BichinhoVaiVemHorizontal(imagem);
-                            break;
-                        case "BichinhoVaiVemVertical":
-                            personagem = new BichinhoVaiVemVertical(imagem);
-                            break;
-                        case "Caveira":
-                            personagem = new Caveira(imagem);
-                            break;
-                        case "Chaser":
-                            personagem = new Chaser(imagem);
-                            break;
+                    if (partes.length == 15) {
+                        for (int coluna = 0; coluna < 15; coluna++) {
+                            if (partes[coluna].equals("1")) {
+                                try {
+                                    Personagem parede = new Estatico("parede.png");
+                                    parede.setPosicao(linhaMatriz, coluna);
+                                    this.faseAtual.add(parede);
+                                } catch (Exception e) {
+                                    System.err.println("Erro ao criar parede: " + e.getMessage());
+                                }
+                            }
+                        }
+                    } else {
+                        System.err.println("Linha da matriz com numero incorreto de colunas: " + linhaMatriz);
                     }
+                    linhaMatriz++;
+                }
 
-                    if (personagem != null) {
-                        personagem.setPosicao(x, y);
-                        this.faseAtual.add(personagem);
+                // 2. Processar os personagens apos "Fim;"
+                while ((linha = br.readLine()) != null) {
+                    linha = linha.trim();
+                    if (linha.isEmpty()) continue;
+
+                    String[] partes = linha.split(";");
+                    if (partes.length < 4) continue;
+
+                    String tipo = partes[0].trim();
+                    String imagem = partes[1].trim();
+                    int x = Integer.parseInt(partes[2].trim());
+                    int y = Integer.parseInt(partes[3].trim());
+
+                    if (tipo.equals("Hero")) {
+                        this.heroi = new Hero(imagem);
+                        this.heroi.setPosicao(x, y);
+                        this.faseAtual.add(this.heroi);
+                    } else {
+                        try {
+                            Class<?> clazz = Class.forName("Modelo." + tipo);
+
+                            if (Personagem.class.isAssignableFrom(clazz)) {
+                                Personagem personagem = (Personagem) clazz
+                                        .getDeclaredConstructor(String.class)
+                                        .newInstance(imagem);
+                                personagem.setPosicao(x, y);
+                                this.faseAtual.add(personagem);
+                                System.out.println("Personagem " + tipo + " criado com sucesso!");
+                            } else {
+                                System.err.println(tipo + " não e um Personagem valido");
+                            }
+                        } catch (ClassNotFoundException e) {
+                            System.err.println("ERRO: Classe Modelo." + tipo + " nao encontrada.");
+                        } catch (Exception e) {
+                            System.err.println("Erro ao criar " + tipo + ": " + e.toString());
+                        }
                     }
                 }
             } catch (IOException e) {
-                System.out.println("erro");
+                System.err.println("Erro ao ler arquivo: " + e.getMessage());
             }
         }
     }
+
 
     // Construtor
     public Tela() {
@@ -295,6 +322,15 @@ public class Tela extends JFrame implements KeyListener {
         );
 
         this.pack();
+        layout.setVerticalGroup(
+                layout.createParallelGroup(Alignment.LEADING)
+                        .addGap(0, 561, Short.MAX_VALUE)
+        );
+
+        this.pack();
+        this.setLocationRelativeTo(null); // Centraliza a janela na tela
+        this.setVisible(true);
+        this.createBufferStrategy(2); // Cria dupla estratégia de buffer para evitar flickering
     }
 
     // Obrigatorios da interface KeyListener - nao pode apagar se nao da pau (nao sao usados por enquanto mas tbm nao sei se vamos usar)
