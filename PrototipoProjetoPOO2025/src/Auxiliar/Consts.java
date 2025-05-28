@@ -10,4 +10,5 @@ public class Consts {
     public static final int PERIOD = 200;
     public static final String PATH = File.separator+"imgs"+File.separator;
     public static final int TIMER = 10;
+    public static final int CHASER_TIMER = 3;
 }

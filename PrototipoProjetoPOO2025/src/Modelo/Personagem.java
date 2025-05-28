@@ -22,10 +22,6 @@ public abstract class Personagem implements Serializable {
     protected boolean bMortal;       /*Se encostar, morre?*/
     protected int vidas;
 
-    public boolean isbMortal() {
-        return bMortal;
-    }
-
     protected Personagem(String sNomeImagePNG) {
         this.pPosicao = new Posicao(1,1);
         this.bTransponivel = true;
@@ -40,6 +36,13 @@ public abstract class Personagem implements Serializable {
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    // Atualiza vida
+
+
+    public boolean isbMortal() {
+        return bMortal;
     }
 
     public Posicao getPosicao() {
@@ -67,30 +70,9 @@ public abstract class Personagem implements Serializable {
     public int getVidas() {
         return vidas;
     }
-    
-    protected boolean perdeVida(){
-        if (this.isbMortal()){
-            vidas -= vidas;
-            return true;
-        }
-        else
-            return false;
+
+    public void setVidas(int vidas) {
+        this.vidas = vidas;
     }
 
-    /*public boolean moveUp() {
-        return this.pPosicao.moveUp();
-    }
-
-    public boolean moveDown() {
-        return this.pPosicao.moveDown();
-    }
-
-    public boolean moveRight() {
-        return this.pPosicao.moveRight();
-    }
-
-    public boolean moveLeft() {
-        return this.pPosicao.moveLeft();
-    }
-    */
 }

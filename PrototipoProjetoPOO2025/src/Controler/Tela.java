@@ -38,7 +38,6 @@ import javax.swing.GroupLayout.Alignment;
 // Para ler as fases
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 
 // Classe principal da janela do jogo que representa a tela de exibicao e controle do jogo.
 // Implementa KeyListener para capturar os eventos de teclado.
@@ -66,33 +65,11 @@ public class Tela extends JFrame implements KeyListener {
         if (contadorDeFases < 6) {
             try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo))) {
                 String linha;
-                int linhaMatriz = 0;
-
-                // 1. Processar a matriz das paredes
-                while ((linha = br.readLine()) != null) {
-                    if (linha.equalsIgnoreCase("Fim;")) break;
-
-                    String[] partes = linha.split(";");
-                    if (partes.length == 15) {
-                        for (int coluna = 0; coluna < 15; coluna++) {
-                            if (partes[coluna].equals("1")) {
-                                try {
-                                    Personagem parede = new Estatico("parede.png");
-                                    parede.setPosicao(linhaMatriz, coluna);
-                                    this.faseAtual.add(parede);
-                                } catch (Exception e) {
-                                    System.err.println("Erro ao criar parede: " + e.getMessage());
-                                }
-                            }
-                        }
-                    } else {
-                        System.err.println("Linha da matriz com numero incorreto de colunas: " + linhaMatriz);
-                    }
-                    linhaMatriz++;
-                }
+                int linhaMatriz = 1;
 
                 // 2. Processar os personagens apos "Fim;"
                 while ((linha = br.readLine()) != null) {
+                    if (linha.equalsIgnoreCase("Fim;")) break;
                     linha = linha.trim();
                     if (linha.isEmpty()) continue;
 
@@ -128,6 +105,29 @@ public class Tela extends JFrame implements KeyListener {
                             System.err.println("Erro ao criar " + tipo + ": " + e.toString());
                         }
                     }
+                }
+
+                // 1. Processar a matriz das paredes
+                while ((linha = br.readLine()) != null) {
+                    if (linha.equalsIgnoreCase("Fim;")) break;
+
+                    String[] partes = linha.split(";");
+                    if (partes.length == 13) {
+                        for (int coluna = 0; coluna < 13; coluna++) {
+                            if (partes[coluna].equals("1")) {
+                                try {
+                                    Personagem parede = new Estatico("parede.png");
+                                    parede.setPosicao(linhaMatriz, coluna+1);
+                                    this.faseAtual.add(parede);
+                                } catch (Exception e) {
+                                    System.err.println("Erro ao criar parede: " + e.getMessage());
+                                }
+                            }
+                        }
+                    } else {
+                        System.err.println("Linha da matriz com numero incorreto de colunas: " + linhaMatriz);
+                    }
+                    linhaMatriz++;
                 }
             } catch (IOException e) {
                 System.err.println("Erro ao ler arquivo: " + e.getMessage());
@@ -270,6 +270,7 @@ public class Tela extends JFrame implements KeyListener {
 
     // Controla o movimento do heroi
     public void keyPressed(KeyEvent e) {
+
         // Codigo 67 = 'C' limpa a fase atual (remove todos personagens)
         if (e.getKeyCode() == 67) {
             this.faseAtual.clear();
@@ -295,10 +296,6 @@ public class Tela extends JFrame implements KeyListener {
 
         // Atualiza a camera para acompanhar o heroi
         this.atualizaCamera();
-
-        // Atualiza o título da janela com informacoes de vidas e posicoo atual do heroi
-        int vidasHeroi = this.heroi.getVidas();
-        this.setTitle("Vidas: " + vidasHeroi + " -> Celula: " + this.heroi.getPosicao().getColuna() + ", " + this.heroi.getPosicao().getLinha());
     }
 
     // Inicializa componentes da janela - layout basico, config da janela
