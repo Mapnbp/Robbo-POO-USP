@@ -4,10 +4,7 @@ package Controler;
 import Modelo.Chaser;
 import Modelo.Personagem;
 import Modelo.Hero;
-import Modelo.Fase;
 import Auxiliar.Posicao;
-
-import java.util.ArrayList;
 
 public class ControleDeJogo {
 
@@ -24,16 +21,33 @@ public class ControleDeJogo {
         Hero heroi = (Hero) fase.get(0);  // Assume que o heroi esta sempre na posicao 0 da lista
         Personagem personagemAtual;
 
-        // Verifica se heroi colidiu com algum personagem mortal para remover esse personagem
+        if(heroi.getVidas() == 0) {
+            fase.clear();
+            System.out.println("Voce perdeu aperte fodase para recomeçar");
+        }
+
+        // Verifica se heroi colidiu com inimigo reduz vida do heroi
         for (int i = 1; i < fase.size(); i++) {
             personagemAtual = fase.get(i);
             if (heroi.getPosicao().igual(personagemAtual.getPosicao())) {
-                /* TO-DO: implementar verificacao completa se o personagem eh mortal antes de remover */
                 if (personagemAtual.isbTransponivel()) {
-                    if (personagemAtual.isbMortal()) {
-                        fase.remove(personagemAtual);
-                        i--; // Ajusta o indice apos remover para nao pular elementos
+                    switch (personagemAtual.getClass().getSimpleName()) {
+                        case "Chaser":
+                            heroi.setVidas(0);
+                            break;
+                        case "Ingrediente":
+                            fase.setiContaIngredientesRestantes( fase.getiContaIngredientesRestantes() - 1 );
+                            fase.remove(personagemAtual);
+                            System.out.println(fase.getiContaIngredientesRestantes());
+                            break;
+                        default:
+                            if(personagemAtual.isbMortal()) {
+                                heroi.setVidas(heroi.getVidas() - 1);
+                            }
+                            break;
                     }
+                    // Local onde temos que mostrar a atualização da vida
+                    //System.out.println(heroi.getVidas());
                 }
             }
         }

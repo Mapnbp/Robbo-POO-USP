@@ -12,7 +12,6 @@ public class Caveira extends Estatico {
     
     public Caveira(String sNomeImagePNG) {
         super(sNomeImagePNG);
-        this.bTransponivel = false;
         bMortal = false;
         this.iContaIntervalos = 0;
     }
@@ -22,7 +21,7 @@ public class Caveira extends Estatico {
 
         this.iContaIntervalos++;
         if(this.iContaIntervalos == Consts.TIMER){
-            this.iContaIntervalos = 0;
+            this.iContaIntervalos = 1;
             Fogo f = new Fogo("fire.png");
             f.setPosicao(pPosicao.getLinha(),pPosicao.getColuna()+1);
             Desenho.getTelaJogo().adicionarPersonagem(f);

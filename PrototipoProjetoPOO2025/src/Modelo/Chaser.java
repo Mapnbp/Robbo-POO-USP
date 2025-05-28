@@ -17,12 +17,12 @@ public class Chaser extends Animado {
 
     private boolean iDirectionV;
     private boolean iDirectionH;
-
+    private int iContador;
     public Chaser(String sNomeImagePNG) {
         super(sNomeImagePNG);
         iDirectionV = true;
         iDirectionH = true;
-        
+        iContador = 0;
         this.bTransponivel = true;
     }
 
@@ -40,17 +40,21 @@ public class Chaser extends Animado {
     }
 
     public void autoDesenho() {
+        if(iContador == 2) { // Velocidade de movimento do personagem baseado nas atualizações da tela
+            iContador = 0;
+            if (iDirectionH) {
+                this.moveLeft();
+            } else {
+                this.moveRight();
+            }
+            if (iDirectionV) {
+                this.moveUp();
+            } else {
+                this.moveDown();
+            }
+        }
         super.autoDesenho();
-        if (iDirectionH) {
-            this.moveLeft();
-        } else {
-            this.moveRight();
-        }
-        if (iDirectionV) {
-            this.moveUp();
-        } else {
-            this.moveDown();
-        }
+        iContador++;
     }
 
 }

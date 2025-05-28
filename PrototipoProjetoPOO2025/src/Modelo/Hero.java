@@ -14,10 +14,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class Hero extends Animado {
+    // ingredientes
     public Hero(String sNomeImagePNG) {
         super(sNomeImagePNG);
         vidas = 5;
-    } 
+    }
+
+
     
     public boolean setPosicao(int linha, int coluna){
         if(this.pPosicao.setPosicao(linha, coluna)){
@@ -28,6 +31,6 @@ public class Hero extends Animado {
             return true;
         }
         return false;       
-    }   
-    
+    }
+
 }

@@ -19,5 +19,5 @@ public class Fogo extends Animado{
         if(!this.moveRight())
             Desenho.getTelaJogo().removerPersonagem(this);
     }
-    
+
 }

@@ -5,5 +5,6 @@ public class Estatico extends Personagem {
     
     public Estatico(String sNomeImagePNG) {
         super(sNomeImagePNG);
+        this.bTransponivel = false;
     }
 }
