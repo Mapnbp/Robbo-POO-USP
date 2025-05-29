@@ -1,4 +1,4 @@
-Hero;Robbo.png;3;3
+Hero;Robbo.png;0;3
 ZigueZague;robo.png;5;5
 BichinhoVaiVemHorizontal;roboPink.png;3;3
 BichinhoVaiVemHorizontal;roboPink.png;6;6

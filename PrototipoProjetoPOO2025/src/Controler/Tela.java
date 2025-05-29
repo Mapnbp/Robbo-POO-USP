@@ -66,7 +66,7 @@ public class Tela extends JFrame implements KeyListener {
         // Define o tamanho da janela considerando as bordas e insets
         this.setSize(750 + this.getInsets().left + this.getInsets().right, 750 + this.getInsets().top + this.getInsets().bottom);
 
-        this.faseAtual = new Fase(new ArrayList<>());
+        this.faseAtual = new Fase(new ArrayList<>(), contadorDeFases);
         this.carregarFase("imgs/fase" + contadorDeFases + ".txt");
     }
 
@@ -78,6 +78,8 @@ public class Tela extends JFrame implements KeyListener {
             } catch (IOException e) {
                 System.err.println("Erro ao ler arquivo: " + e.getMessage());
             }
+        } else {
+            System.exit(0);
         }
     }
 
@@ -277,28 +279,47 @@ public class Tela extends JFrame implements KeyListener {
 
     // Controla o movimento do heroi
     public void keyPressed(KeyEvent e) {
-
-        // Codigo 67 = 'C' limpa a fase atual (remove todos personagens)
-        if (e.getKeyCode() == 67) {
-            this.faseAtual.clear();
-            contadorDeFases++;
-            this.carregarFase("imgs/fase" + contadorDeFases + ".txt");
-
-            // Setas cima(38) ou W(87) movem o heroi para cima
-        } else if (e.getKeyCode() == 38 || e.getKeyCode() == 87) {
-            this.heroi.moveUp();
-
-            // Setas baixo(40) ou S(83) movem o heroi para baixo
-        } else if (e.getKeyCode() == 40 || e.getKeyCode() == 83) {
-            this.heroi.moveDown();
-
-            // Setas esquerda(37) ou A(65) movem o heroi para esquerda
-        } else if (e.getKeyCode() == 37 || e.getKeyCode() == 65) {
-            this.heroi.moveLeft();
-
-            // Setas direita(39) ou D(68) movem o heroi para direita
-        } else if (e.getKeyCode() == 39 || e.getKeyCode() == 68) {
-            this.heroi.moveRight();
+        int tecla = e.getKeyCode();
+        switch (tecla) {
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
+                heroi.moveUp();
+                break;
+            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_S:
+                heroi.moveDown();
+                break;
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_A:
+                heroi.moveLeft();
+                break;
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_D:
+                heroi.moveRight();
+                break;
+            case KeyEvent.VK_C:
+                contadorDeFases++;
+                if(contadorDeFases < 6) {
+                    this.faseAtual.clear();
+                    this.carregarFase("imgs/fase" + contadorDeFases + ".txt");
+                    if (!faseAtual.getPersonagens().isEmpty()) {
+                        this.heroi = (Hero) this.faseAtual.get(0);
+                    }
+                } else {
+                    System.exit(0);
+                }
+                break;
+            case KeyEvent.VK_E: // salva
+                this.faseAtual.save(contadorDeFases);
+                break;
+            case KeyEvent.VK_L: // carrega o jogo salvo
+                Fase faseCarregada = Fase.load(faseAtual.getPersonagens(), contadorDeFases);
+                if (faseCarregada != null) {
+                    this.faseAtual = faseCarregada;
+                    this.heroi = (Hero) this.faseAtual.get(0); // Reatribuir o herói
+                    System.out.println("Fase carregada via tecla L.");
+                }
+                break;
         }
 
         // Atualiza a camera para acompanhar o heroi
