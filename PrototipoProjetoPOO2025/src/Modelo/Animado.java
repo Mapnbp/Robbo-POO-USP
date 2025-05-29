@@ -7,6 +7,7 @@ public class Animado extends Personagem{
     
     public Animado(String sNomeImagePNG) {
         super(sNomeImagePNG);
+        bMortal = true;
     }
     
     public void voltaAUltimaPosicao(){

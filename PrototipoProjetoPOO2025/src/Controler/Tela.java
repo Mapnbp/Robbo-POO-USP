@@ -43,11 +43,7 @@ import java.io.FileReader;
 // Implementa KeyListener para capturar os eventos de teclado.
 public class Tela extends JFrame implements KeyListener {
 
-    // Heroi principal controlado pelo jogador
     private Hero heroi;
-
-    // Fase atual do jogo, que contem todos os personagens e elementos
-    private Fase fases[] = new Fase[5];
     private Fase faseAtual;
 
     // ControleDeJogo centraliza regras e processamento da fase
@@ -61,81 +57,6 @@ public class Tela extends JFrame implements KeyListener {
     private int cameraColuna = 0;
     private int contadorDeFases = 1;
 
-    public void carregarFase(String caminhoArquivo) {
-        if (contadorDeFases < 6) {
-            try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo))) {
-                String linha;
-                int linhaMatriz = 1;
-
-                // 2. Processar os personagens apos "Fim;"
-                while ((linha = br.readLine()) != null) {
-                    if (linha.equalsIgnoreCase("Fim;")) break;
-                    linha = linha.trim();
-                    if (linha.isEmpty()) continue;
-
-                    String[] partes = linha.split(";");
-                    if (partes.length < 4) continue;
-
-                    String tipo = partes[0].trim();
-                    String imagem = partes[1].trim();
-                    int x = Integer.parseInt(partes[2].trim());
-                    int y = Integer.parseInt(partes[3].trim());
-
-                    if (tipo.equals("Hero")) {
-                        this.heroi = new Hero(imagem);
-                        this.heroi.setPosicao(x, y);
-                        this.faseAtual.add(this.heroi);
-                    } else {
-                        try {
-                            Class<?> clazz = Class.forName("Modelo." + tipo);
-
-                            if (Personagem.class.isAssignableFrom(clazz)) {
-                                Personagem personagem = (Personagem) clazz
-                                        .getDeclaredConstructor(String.class)
-                                        .newInstance(imagem);
-                                personagem.setPosicao(x, y);
-                                this.faseAtual.add(personagem);
-                                System.out.println("Personagem " + tipo + " criado com sucesso!");
-                            } else {
-                                System.err.println(tipo + " não e um Personagem valido");
-                            }
-                        } catch (ClassNotFoundException e) {
-                            System.err.println("ERRO: Classe Modelo." + tipo + " nao encontrada.");
-                        } catch (Exception e) {
-                            System.err.println("Erro ao criar " + tipo + ": " + e.toString());
-                        }
-                    }
-                }
-
-                // 1. Processar a matriz das paredes
-                while ((linha = br.readLine()) != null) {
-                    if (linha.equalsIgnoreCase("Fim;")) break;
-
-                    String[] partes = linha.split(";");
-                    if (partes.length == 13) {
-                        for (int coluna = 0; coluna < 13; coluna++) {
-                            if (partes[coluna].equals("1")) {
-                                try {
-                                    Personagem parede = new Estatico("parede.png");
-                                    parede.setPosicao(linhaMatriz, coluna+1);
-                                    this.faseAtual.add(parede);
-                                } catch (Exception e) {
-                                    System.err.println("Erro ao criar parede: " + e.getMessage());
-                                }
-                            }
-                        }
-                    } else {
-                        System.err.println("Linha da matriz com numero incorreto de colunas: " + linhaMatriz);
-                    }
-                    linhaMatriz++;
-                }
-            } catch (IOException e) {
-                System.err.println("Erro ao ler arquivo: " + e.getMessage());
-            }
-        }
-    }
-
-
     // Construtor
     public Tela() {
         Desenho.setTelaJogo(this);
@@ -147,6 +68,91 @@ public class Tela extends JFrame implements KeyListener {
 
         this.faseAtual = new Fase(new ArrayList<>());
         this.carregarFase("imgs/fase" + contadorDeFases + ".txt");
+    }
+
+    public void carregarFase(String caminhoArquivo) {
+        if (contadorDeFases < 6) {
+            try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo))) {
+                carregarPersonagem(br);
+                carregarParedes(br);
+            } catch (IOException e) {
+                System.err.println("Erro ao ler arquivo: " + e.getMessage());
+            }
+        }
+    }
+
+    private void carregarPersonagem(BufferedReader br) throws IOException {
+        String linha;
+        // Processar os personagens ate o "Fim"
+        while ((linha = br.readLine()) != null) {
+            if (linha.equalsIgnoreCase("Fim;")) break;
+
+            linha = linha.trim();
+            if (linha.isEmpty()) continue;
+
+            String[] partes = linha.split(";");
+            if (partes.length < 4) {
+                System.out.println("Linha de persongagem com formato indevido");
+                continue; // Vai ignorar caso a linha nao seja valida e ira prosseguir para o proximo
+            }
+
+            String tipo = partes[0].trim();
+            String imagem = partes[1].trim();
+            int x = Integer.parseInt(partes[2].trim());
+            int y = Integer.parseInt(partes[3].trim());
+
+            if (tipo.equals("Hero")) {
+                this.heroi = new Hero(imagem);
+                this.heroi.setPosicao(x, y);
+                this.faseAtual.add(this.heroi);
+            } else {
+                try {
+                    Class<?> clazz = Class.forName("Modelo." + tipo);
+
+                    if (Personagem.class.isAssignableFrom(clazz)) {
+                        Personagem personagem = (Personagem) clazz
+                                .getDeclaredConstructor(String.class)
+                                .newInstance(imagem);
+                        personagem.setPosicao(x, y);
+                        this.faseAtual.add(personagem);
+                    } else {
+                        System.err.println(tipo + " não e um Personagem valido");
+                    }
+                } catch (ClassNotFoundException e) {
+                    System.err.println("ERRO: Classe Modelo." + tipo + " nao encontrada.");
+                } catch (Exception e) {
+                    System.err.println("Erro ao criar " + tipo + ": " + e.toString());
+                }
+            }
+        }
+    }
+
+    private void carregarParedes(BufferedReader br) throws IOException {
+        String linha;
+        int linhaMatriz = 1;
+
+        // Processar a matriz das paredes
+        while ((linha = br.readLine()) != null) {
+            if (linha.equalsIgnoreCase("Fim;")) break;
+
+            String[] partes = linha.split(";");
+            if (partes.length == 13) {
+                for (int coluna = 0; coluna < 13; coluna++) {
+                    if (partes[coluna].equals("1")) {
+                        try {
+                            Personagem parede = new Estatico("parede.png");
+                            parede.setPosicao(linhaMatriz, coluna+1);
+                            this.faseAtual.add(parede);
+                        } catch (Exception e) {
+                            System.err.println("Erro ao criar parede: " + e.getMessage());
+                        }
+                    }
+                }
+            } else {
+                System.err.println("Linha da matriz com numero incorreto de colunas: " + linhaMatriz);
+            }
+            linhaMatriz++;
+        }
     }
 
     // Getters para a posicao atual da camera
@@ -255,6 +261,7 @@ public class Tela extends JFrame implements KeyListener {
         // Mantem a camera dentro dos limites do mapa
         this.cameraLinha = Math.max(0, Math.min(linhaHeroi - 7, 25));
         this.cameraColuna = Math.max(0, Math.min(colunaHeroi - 7, 0));
+        this.setTitle("Vidas: " + (heroi.getVidas()));
     }
 
     // Inicia o loop do jogo para atualizar a tela
@@ -338,14 +345,4 @@ public class Tela extends JFrame implements KeyListener {
     public void keyReleased(KeyEvent e) {
         // Não implementado
     }
-
-    // ---------------------------
-    // O QUE AINDA FALTA IMPLEMENTAR:
-    // - Inicializar o BufferStrategy para evitar problemas graficos (falta chamar createBufferStrategy)
-    // - Implementar controle de colisoes entre personagens e elementos do cenario
-    // - Implementar sistema de pontuacao e eventos do jogo (como derrota e vitoria)
-    // - Melhorar carregamento das imagens para evitar repeticao a cada frame (cachear imagens)
-    // - Adicionar sons e efeitos visuais
-    // - Criar interface para reiniciar fase, pausar e salvar progresso
-    // - Tratar limites de mapa mais flexível para o movimento da câmera
 }

@@ -12,7 +12,6 @@ public class Caveira extends Estatico {
     
     public Caveira(String sNomeImagePNG) {
         super(sNomeImagePNG);
-        bMortal = false;
         this.iContaIntervalos = 0;
     }
 

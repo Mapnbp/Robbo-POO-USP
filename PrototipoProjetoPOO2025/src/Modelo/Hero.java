@@ -17,11 +17,10 @@ public class Hero extends Animado {
     // ingredientes
     public Hero(String sNomeImagePNG) {
         super(sNomeImagePNG);
+        bMortal = false;
         vidas = 5;
     }
 
-
-    
     public boolean setPosicao(int linha, int coluna){
         if(this.pPosicao.setPosicao(linha, coluna)){
             if (!Desenho.getTelaJogo().getControleDeJogo().ehPosicaoValida(
