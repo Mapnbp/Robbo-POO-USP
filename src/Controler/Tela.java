@@ -13,6 +13,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 
 // - java.awt.image.ImageObserver: Interface para observar imagens carregadas.
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
 import java.awt.image.ImageObserver;
 
 // - java.io.*: Para manipulacao de arquivos, tratamento de excecoes IO.
@@ -50,18 +52,18 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
 
     // Buffer grafico para desenhar na tela
     private Graphics graphicsBuffer;
-    
+
     // KeyHandler para leitura do teclado
     KeyHandler keyH = new KeyHandler();
-    MouseHandler mouseH = new MouseHandler();
+    private MouseHandler mouseH = new MouseHandler();
 
     // Coordenadas da "camera" que controla qual parte do mapa esta sendo exibida na tela
     private int cameraLinha = 0;
     private int cameraColuna = 0;
     private int contadorDeFases = 1;
     private int faseSalva = 1;
-    
-    
+    private PersonagemLoader personagemLoader;
+
 
     // Construtor
     public Tela() {
@@ -69,7 +71,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
         this.inicializaComponentes();
         this.addKeyListener(keyH);
         this.setFocusable(true);
-        this.addMouseListener(mouseH);
+        new DropTarget(this, DnDConstants.ACTION_COPY, mouseH);
 
         // Define o tamanho da janela considerando as bordas e insets
         this.setSize(750 + this.getInsets().left + this.getInsets().right, 750 + this.getInsets().top + this.getInsets().bottom);
@@ -77,7 +79,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
         this.faseAtual = new Fase(new ArrayList<>(),contadorDeFases);
         this.carregarFase("fases/fase" + contadorDeFases + ".txt");
         this.faseAtual.setiIngredientesRestantes(this.faseAtual.getiTotalIngredientes());
-        //this.carregaFaseSalva(); nao ta funcionando
+        this.personagemLoader = new PersonagemLoader(this, this.heroi);
     }
 
     // Carrega uma fase: mapa e personagens
@@ -218,7 +220,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
             this.proximaFase();
             keyH.trocaFase = false;
         }
-        
+
         // Verifica se precisar salvar ou carregar o jogo
         if(keyH.salva){
             this.faseAtual.save();
@@ -228,25 +230,33 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
             this.carregaFaseSalva();
             System.out.println(contadorDeFases);
         }
-        
-        // Verifica se algum personagem .zip foi arrastado para o jogo
-        if(mouseH.soltouArquivo){
-           try {
-            String filePath = "personagensSalvos";
-            FileInputStream canoOut = new FileInputStream(filePath);
-            GZIPInputStream compactador = new GZIPInputStream(canoOut);
-            ObjectInputStream serializador = new ObjectInputStream(compactador);
-            Personagem p = (Personagem) serializador.readObject();
-            p.setPosicao(mouseH.x, mouseH.y);
-            this.faseAtual.add(p);
-            } catch (IOException | ClassNotFoundException exc) {
-                System.out.println(exc.getMessage());
+        if(mouseH.arquivoSolto){
+            try {
+                String zipFilePath = mouseH.caminhoArquivoSolto; // Obtém o caminho do arquivo diretamente do MouseHandler
+                System.out.println("Tentando carregar personagens do ZIP: " + zipFilePath);
+
+                // Verifica se o arquivo solto é realmente um ZIP antes de tentar carregar
+                if (zipFilePath != null && zipFilePath.toLowerCase().endsWith(".zip")) {
+                    ArrayList<Personagem> novosPersonagens = personagemLoader.loadPersonagensFromZip(zipFilePath);
+                    if (!novosPersonagens.isEmpty()) {
+                        System.out.println("Carregados " + novosPersonagens.size() + " novos personagens do ZIP.");
+                    } else {
+                        System.out.println("Nenhum personagem foi carregado do ZIP.");
+                    }
+                } else {
+                    System.out.println("O arquivo solto não é um arquivo ZIP válido: " + zipFilePath);
+                }
+            } catch (IOException exc) {
+                System.err.println("Erro ao carregar personagens via arrastar e soltar do ZIP: " + exc.getMessage());
+                exc.printStackTrace();
             }
-           finally {
-               mouseH.soltouArquivo = false;
-           }
+            finally {
+                // Reseta as flags pq se nao da pau
+                mouseH.arquivoSolto = false;
+                mouseH.caminhoArquivoSolto = null;
+            }
         }
-        
+
         // Obtém o grafico para desenhar na tela usando BufferStrategy
         Graphics g = this.getBufferStrategy().getDrawGraphics();
 
@@ -289,7 +299,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
                 }
             }
         }
-        
+
         this.setTitle("FASE: " + contadorDeFases + "         " +
                       "Vidas: " + heroi.getVidas() + "         " +
                       "Ingredientes restantes: " + faseAtual.getiIngredientesRestantes());
@@ -326,6 +336,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
         if (!this.getBufferStrategy().contentsLost()) {
             this.getBufferStrategy().show();
         }
+
     }
 
     // Atualiza a posicao da camera para centralizar no heroi
@@ -349,7 +360,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
         timer.schedule(tarefaRepetitiva, 0L, 200L);
     }
 
-        
+
     // Controla o movimento do heroi
     public void moveHeroi(){
         if(keyH.cima){ this.heroi.moveUp(); }
@@ -358,7 +369,7 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
         else if(keyH.direita){ this.heroi.moveRight(); }
         this.atualizaCamera();
     }
-    
+
     // Troca de fase
     public void proximaFase(){
         contadorDeFases++;
@@ -413,27 +424,22 @@ public class Tela extends JFrame { //implements KeyListener, MouseListener {
                         .addGap(0, 561, Short.MAX_VALUE)
         );
 
+        // Adiciona um WindowListener para chamar cleanup() quando a janela for fechada
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (personagemLoader != null) {
+                    personagemLoader.cleanup();
+                    System.out.println("Arquivos temporarios do PersonagemLoader limpos.");
+                }
+                System.exit(0); // Garante que o aplicativo feche
+            }
+        });
+
         this.pack();
         this.setLocationRelativeTo(null); // Centraliza a janela na tela
         this.setVisible(true);
         this.createBufferStrategy(2); // Cria dupla estratégia de buffer para evitar flickering
     }
-/*
-    public static void main(String[] args) {
-        try {
-            File tanque = new File("Chaser.zip");
-            Chaser chaser = new Chaser("Chaser.png");
-            tanque.createNewFile();
-            FileOutputStream canoOut = new FileOutputStream(tanque);
-            GZIPOutputStream compactador = new GZIPOutputStream(canoOut);
-            ObjectOutputStream serializador = new ObjectOutputStream(compactador);
-            serializador.writeObject(chaser);
-            serializador.flush();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        System.out.println("Oi");
-    }
-*/
 
 }
